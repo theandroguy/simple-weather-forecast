@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
+const path = require('path'); // Import path for serving static files
 require('dotenv').config();
 
 const app = express();
@@ -13,7 +14,7 @@ const API_KEY = process.env.WEATHERSTACK_API_KEY;
 // Weather data endpoint
 app.get('/weather', async (req, res) => {
   const city = req.query.city;
-  
+
   if (!city) {
     return res.status(400).json({ error: 'City is required' });
   }
@@ -25,6 +26,14 @@ app.get('/weather', async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: 'Error fetching weather data' });
   }
+});
+
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, 'client/build')));
+
+// The "catchall" handler: for any request that doesn't match one above, send back the React app.
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
 });
 
 const PORT = process.env.PORT || 5000;
